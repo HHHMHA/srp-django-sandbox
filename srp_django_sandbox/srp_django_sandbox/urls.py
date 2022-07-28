@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from dsrp.views import GenerateChallengeView, RegisterView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', GenerateChallengeView.as_view(), name='challenge'),
+    path('r/', RegisterView.as_view(), name='register')
 ]
