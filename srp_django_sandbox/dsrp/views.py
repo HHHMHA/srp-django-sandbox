@@ -32,9 +32,9 @@ class GenerateChallengeView(CreateView):
             raise ValidationError("Couldn't login with provided credentials.")
 
         request.session['srp'] = {
-            'salt': user.get_salt(),
-            'vkey': user.get_vkey(),
-            'A': A,
+            'salt': user.salt,
+            'vkey': user.vkey,
+            'A': A.hex(),
             'username': user.username,
         }
         return JsonResponse(data={
@@ -53,6 +53,8 @@ class LoginView(View):
             raise ValidationError("Fuck you")
 
         login(request, user)
+        request.session['srp'] = {}
+        request.session.modified = True
         return redirect(reverse('user_home'))
 
 
