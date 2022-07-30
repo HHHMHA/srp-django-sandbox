@@ -22,6 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', GenerateChallengeView.as_view(), name='challenge'),
     path('login/', LoginView.as_view(), name='login'),
-    path('r/', RegisterView.as_view(), name='register')
-    path('home/', HomePageView.as_view(), name='user_home')
+    path('r/', RegisterView.as_view(), name='register'),
+    path('home/', HomePageView.as_view(), name='user_home'),
 ]
