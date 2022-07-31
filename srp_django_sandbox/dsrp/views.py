@@ -1,5 +1,7 @@
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
+from srp._pysrp import long_to_bytes
 
 from .verifier import Verifier
 from django.core.exceptions import ValidationError
@@ -36,6 +38,7 @@ class GenerateChallengeView(CreateView):
             'vkey': user.vkey,
             'A': A.hex(),
             'username': user.username,
+            'b': long_to_bytes(svr.b).hex(),  # Needed for keeping public key of server the same
         }
         return JsonResponse(data={
             's': s.hex(),
@@ -50,7 +53,7 @@ class LoginView(View):
         user = authenticate(request, M=M, **request.session.get('srp', {}))
 
         if not user:
-            raise ValidationError("Fuck you")
+            return JsonResponse({"message": "Fuck you!"}, status=400)
 
         login(request, user)
         request.session['srp'] = {}
@@ -58,7 +61,7 @@ class LoginView(View):
         return redirect(reverse('user_home'))
 
 
-class HomePageView(TemplateView):
+class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'home.html'
 
 # https://github.com/alax/jsrp

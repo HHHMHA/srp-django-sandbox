@@ -5,6 +5,9 @@ User = get_user_model()
 
 
 class UserCreateForm(forms.ModelForm):
+    salt = forms.CharField(widget=forms.HiddenInput())
+    vkey = forms.CharField(widget=forms.HiddenInput())
+
     class Meta:
         model = User
         fields = (
@@ -15,7 +18,7 @@ class UserCreateForm(forms.ModelForm):
 
 
 class GenerateChallengeForm(forms.ModelForm):
-    A = forms.CharField()
+    A = forms.CharField(widget=forms.HiddenInput())
 
     class Meta:
         model = User

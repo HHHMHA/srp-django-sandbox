@@ -1,5 +1,33 @@
-<form method="post">
+{% load static %}
+
+<form method="post" id="form">
     {% csrf_token %}
     {{ form.as_p }}
+    <label for="id_password">Password:</label>
+    <input type="password" name="password" id="id_password">
     <button type="submit">save</button>
 </form>
+<script type="text/javascript" src="{% static 'jsrp-browser.js' %}"></script>
+<script type="text/javascript" src="{% static 'jquery-3.6.0.min.js' %}"></script>
+<script>
+    $("#form").submit(submitForm);
+    function submitForm(e) {
+        e.preventDefault();
+
+        var client = new jsrp.client();
+        const registerURL = "{% url 'register' %}";
+        const username = $("input[name='username']").val();
+        const password = $("input[name='password']").val();
+
+        client.init({username: username, password: password}, function () {
+            client.createVerifier(function (err, result) {
+                result.username = username;
+                result.vkey = result.verifier;
+                result.csrfmiddlewaretoken = $("input[name='csrfmiddlewaretoken']").val();
+                $.post(registerURL, result).done((response) => {
+                    window.location.href = '/';
+                })
+            });
+        });
+    }
+</script>

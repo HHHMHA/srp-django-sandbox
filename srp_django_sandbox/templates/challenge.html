@@ -7,11 +7,51 @@
     <title>Title</title>
 </head>
 <body>
-<form method="post">
+<form method="post" id="form">
     {% csrf_token %}
     {{ form.as_p }}
+    <label for="id_password">Password:</label>
+    <input type="password" name="password" id="id_password">
     <button type="submit">login</button>
 </form>
 <script type="text/javascript" src="{% static 'jsrp-browser.js' %}"></script>
+<script type="text/javascript" src="{% static 'jquery-3.6.0.min.js' %}"></script>
+<script>
+    $("#form").submit(submitForm);
+
+    function submitForm(e) {
+        e.preventDefault();
+
+        const username = $("input[name='username']").val();
+        const password = $("input[name='password']").val();
+
+        var client = new jsrp.client();
+        client.init({username: username, password: password}, function () {
+            login(client, username);
+        });
+    }
+
+    function login(client, username) {
+        const A = client.getPublicKey();
+        const challengeURL = "{% url 'challenge' %}";
+        const loginURL = "{% url 'login' %}";
+        const homeURL = "{% url 'user_home' %}";
+        const payload = {
+            A: A,
+            username: username,
+            csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val(),
+        }
+        $.post(challengeURL, payload).done(response => {
+            client.setSalt(response.s);
+            client.setServerPublicKey(response.B);
+
+            const M = client.getProof();
+            console.log(client.getSharedKey());
+            $.post(loginURL, {M:M, csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val(),}).done(response => {
+                window.location.href = homeURL;
+            }).fail(res => alert(res.responseJSON.message));
+        });
+    }
+</script>
 </body>
 </html>
